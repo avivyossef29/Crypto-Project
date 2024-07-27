@@ -2,11 +2,11 @@
 # Heartbleed Vulnerability Demonstration
 
 This project demonstrates the Heartbleed vulnerability (CVE-2014-0160)
-by setting up an SSL server and using two clients to interact with it. 
-The first client sends passeward.txt to the server.
-Later,the second client sends a malicious heartbeat request to exploit the vulnerability,
-and print thr first 100 lines of the server response.
-You can check that the server response contain sensitive data from the passeward.txt file  
+by setting up an SSL server and using two clients to interact with it.
+The first client sends password.txt to the server.
+Later, the second client sends a malicious heartbeat request to exploit the vulnerability
+and print the first 100 lines of the server response.
+You can check that the server response contains sensitive data from the password.txt file
 
 ## Overview
 
@@ -66,7 +66,6 @@ The second client connects and sends a malicious heartbeat request to the server
 3. Run the client container:
    ```sh
    docker run --rm vulnerable-ssl-client 172.17.0.2
-   
+
 ## Output
-- Now you can see the server response to the heartblead attack in the client side, and the server logs in the server side.  
-   ```
+- Now you can see the server response to the heartbleed attack on the client side, and the server logs on the server side.
