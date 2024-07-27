@@ -12,9 +12,6 @@ RUN apt-get update && \
 RUN wget https://www.openssl.org/source/old/1.0.1/openssl-1.0.1f.tar.gz && \
     tar -xzf openssl-1.0.1f.tar.gz && \
     cd openssl-1.0.1f && \
-    sed -i '1i #include <stdio.h>\n#include <stdlib.h>\nvoid load_passwords_into_memory() {\nFILE *password_file;\nchar *passwords;\nlong length;\npassword_file = fopen("/app/passwords.txt", "r");\nif (password_file) {\nfseek(password_file, 0, SEEK_END);\nlength = ftell(password_file);\nfseek(password_file, 0, SEEK_SET);\npasswords = malloc(length + 1);\nif (passwords) {\nif (fread(passwords, 1, length, password_file) == length) {\npasswords[length] = '\\0';\nprintf("Passwords loaded into memory:\\n%s\\n", passwords);\nprintf("First 10 chars: %.10s\\n", passwords);\n}\n}\nfclose(password_file);\n}\n}' ssl/t1_lib.c && \
-    sed -i '/if (hbtype == TLS1_HB_REQUEST) {/a setbuf(stdout, NULL);\nprintf("Heartbeat request received in openssl proccess\\n");\nload_passwords_into_memory();\nfflush(stdout);' ssl/t1_lib.c && \
-    sed -i '/int ret = 0;/a printf("Message received, processing in OpenSSL\\n");' ssl/s3_pkt.c && \
     ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib && \
     make && \
     make install_sw && \
@@ -36,7 +33,6 @@ RUN mkdir -p /app
 # Copy the server.c and Makefile files into the /app directory
 COPY server.c /app/server.c
 COPY Makefile /app/Makefile
-COPY passwords.txt /app/passwords.txt
 
 # Set the working directory
 WORKDIR /app
