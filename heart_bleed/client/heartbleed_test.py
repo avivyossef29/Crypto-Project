@@ -81,7 +81,6 @@ def receive_message(sock):
         return None, None, None
 
     message_type, version, length = struct.unpack('>BHH', header)
-    print(f"message_type {message_type}, version {version}, length {length}")
     payload = recvall(sock, length, 10)
     if not payload:
         print('Unexpected EOF receiving record payload - server closed connection')
