@@ -21,7 +21,6 @@ echo -n $CLIENT_HELLO_NO_COMPRESSION_BIN | openssl s_client -connect "${SE
 RVER_ADDRESS}:443" -tls1_1 -cipher ALL:!COMPLEMENTOFDEFAULT:!eNULL
 # Send sensitive data
 (
-    echo "SensitiveInformation123"
     cat "password.txt"
 ) | openssl s_client -connect "${SERVER_ADDRESS}:443" -tls1_1 -cipher ALL:!COMPLEMENTOFDEFAULT:!eNULL
 
@@ -37,14 +36,14 @@ echo "Second client connect and send malicious heartbeat request to the server"
 python3 heartbleed_test.py "$SERVER_ADDRESS"
 
 # Debugging: Ensure hexdump.txt exists and is not empty
-if [ ! -s hexdump.txt ]; then
-    echo "hexdump.txt is empty or does not exist."
+if [ ! -s heartbeat_response.txt ]; then
+    echo "heartbeat_response.txt is empty or does not exist."
     exit 1
 fi
 
 echo "Print the first 100 lines of server response to second client"
 
-# Display the first 100 lines of hexdump.txt without using cat
+# Display the first 100 lines of heartbeat_response.txt without using cat
 counter=0
 while IFS= read -r line
 do
@@ -54,4 +53,4 @@ do
         break
     fi
 
-done < "${SHARED_DIR}/hexdump.txt"
+done < "heartbeat_response.txt"

