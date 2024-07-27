@@ -43,36 +43,6 @@ SSL_CTX *create_context()
     return ctx;
 }
 
-// Function to load passwords into memory
-void load_passwords()
-{
-    FILE *file = fopen(PASSWORD_FILE, "r");
-    if (!file)
-    {
-        perror("Unable to open password file");
-        fflush(stderr); // Flush stderr
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(file, 0, SEEK_END);
-    long fsize = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    passwords = malloc(fsize + 1);
-    if (!passwords)
-    {
-        perror("Unable to allocate memory");
-        fflush(stderr); // Flush stderr
-        exit(EXIT_FAILURE);
-    }
-
-    fread(passwords, 1, fsize, file);
-    fclose(file);
-    passwords[fsize] = '\0';
-    printf("Passwords loaded into memory:\n%s\n", passwords);
-    fflush(stdout); // Flush stdout
-}
-
 void configure_context(SSL_CTX *ctx)
 {
     // Load server's certificate into the SSL context
@@ -133,9 +103,6 @@ int main(int argc, char **argv)
     int sock;
     struct sockaddr_in addr;
 
-    // Load passwords into memory
-    // load_passwords();
-
     printf("OpenSSL version: %s\n", SSLeay_version(SSLEAY_VERSION));
     fflush(stdout); // Flush stdout
     init_openssl();
@@ -182,12 +149,16 @@ int main(int argc, char **argv)
             fflush(stderr); // Flush stderr
             exit(EXIT_FAILURE);
         }
+        printf("new client connected\n");
+        fflush(stdout); // Flush stdout
 
         ssl = SSL_new(ctx);
         SSL_set_fd(ssl, client);
 
         if (SSL_accept(ssl) <= 0)
         {
+            printf("SSL_accept failed\n");
+            printf("Maybe the client is trying to exploit the Heartbleed vulnerability\n");
             ERR_print_errors_fp(stderr);
             fflush(stderr); // Flush stderr
         }
