@@ -1,15 +1,15 @@
-# Use an Ubuntu base image
-FROM ubuntu:14.04
+# Use an older Ubuntu base image
+FROM ubuntu:20.04
 
-# Install Curl and OpenSSL
+# Install necessary packages
 RUN apt-get update && \
     apt-get install -y curl openssl
 
-# Create a script to connect to the server
+# Copy the connection script
 COPY ./connect.sh /connect.sh
 
 # Make the script executable
 RUN chmod +x /connect.sh
 
 # Run the connection script
-CMD ["/connect.sh"]
+CMD ["curl", "--sslv3",  "--ciphers", "AES128-SHA", "https://server-demo/", " --insecure"]

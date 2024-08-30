@@ -1,39 +1,40 @@
-# Use an older base image with OpenSSL that supports SSLv3
-FROM ubuntu:14.04
+# Use an older Ubuntu base image
+FROM ubuntu:20.04
 
-# Install dependencies
+# Install necessary packages for building OpenSSL and Python dependencies
 RUN apt-get update && \
-    apt-get install -y apache2 openssl python3 python3-pip
-
-RUN pip3 install --index-url https://pypi.python.org/simple/ --upgrade pip3
-
-RUN pip3 install --upgrade setuptools
+    apt-get install -y build-essential checkinstall zlib1g-dev wget \
+    python3-pip
 
 # Install Flask
 RUN pip3 install flask
 
+# Download OpenSSL 1.0.2u (the last release of the 1.0.2 branch)
+RUN wget https://www.openssl.org/source/openssl-1.0.2u.tar.gz && \
+    tar -xvf openssl-1.0.2u.tar.gz && \
+    cd openssl-1.0.2u && \
+    ./config enable-ssl3 enable-ssl3-method no-shared && \
+    make && \
+    make install
 
-# Enable SSL and install mod_ssl
-RUN a2enmod ssl
+# Update the OpenSSL paths
+ENV PATH="/usr/local/ssl/bin:$PATH"
+ENV LD_LIBRARY_PATH="/usr/local/ssl/lib"
 
-# Set the ServerName globally
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# Set working directory
+WORKDIR /server
 
-# Copy the SSL configuration file
-COPY ./httpd-ssl.conf /etc/apache2/sites-available/default-ssl.conf
+# Copy the Flask server into the container
+COPY ./server.py /server/server.py
 
 # Copy the SSL certificates
-COPY ./server.crt /etc/ssl/certs/server.crt
-COPY ./server.key /etc/ssl/private/server.key
+COPY ./server.crt /server/server.crt
+COPY ./server.key /server/server.key
 
-# Copy the Flask app
-COPY ./server.py /server.py
-
-# Enable the SSL site
-RUN a2ensite default-ssl
-
-# Expose port 443 for SSL
+# Expose port 443 for HTTPS
 EXPOSE 443
 
-# Start Apache in the foreground and the Flask app
-CMD ["bash", "-c", "apachectl -D FOREGROUND & python /server.py"]
+ENTRYPOINT [ "python3" ]
+
+# Run the Flask server
+CMD ["server.py"]
