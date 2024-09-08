@@ -1,15 +1,16 @@
-# Use an older Ubuntu base image
-FROM ubuntu:20.04
+FROM python:3.5.3-alpine3.4
 
-# Install necessary packages
-RUN apt-get update && \
-    apt-get install -y curl openssl
+RUN apk --no-cache add curl
 
-# Copy the connection script
-COPY ./connect.sh /connect.sh
+RUN pip install -U pip
 
-# Make the script executable
-RUN chmod +x /connect.sh
+RUN pip install --trusted-host pypi.python.org requests==2.5.0 urllib3==1.10
+
+COPY ./script.py /script.py
+
+RUN export PYTHONWARNINGS="ignore:Unverified HTTPS request"
+
+CMD ["python", "script.py"]
 
 # Run the connection script
-CMD ["curl", "--sslv3",  "--ciphers", "AES128-SHA", "https://server-demo/", " --insecure"]
+#CMD ["curl", "--sslv3", "--insecure", "--ciphers", "AES128-SHA", "https://server-demo/"]

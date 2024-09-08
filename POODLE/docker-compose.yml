@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  server:
+    build: ./server
+    container_name: server_container
+    networks:
+      custom_network:
+        ipv4_address: 192.168.10.2
+    ports:
+      - "443:443"
+
+  attacker:
+    build: ./attacker
+    container_name: attacker_container
+    networks:
+      custom_network:
+        ipv4_address: 192.168.10.3
+
+  victim:
+    build: ./victim
+    container_name: victim_container
+    networks:
+      custom_network:
+        ipv4_address: 192.168.10.4
+
+networks:
+  custom_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24

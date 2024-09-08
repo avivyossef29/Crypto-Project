@@ -1,0 +1,1 @@
+docker run --rm --network=custom_network --privileged --cap-add=NET_ADMIN --cap-add=NET_RAW attacker-demo  
