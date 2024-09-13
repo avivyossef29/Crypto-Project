@@ -54,11 +54,10 @@ def login():
     elif user['password'] != password:
         res.set_data("wrong username or password")
     else:
-        cookie = uuid4()
+        cookie = str(uuid4())
         user['cookie'] = cookie
         user['expired'] = False
-        res.set_data("login successful")
-        res.set_cookie('secret-cookie', cookie)
+        res.set_data(cookie)
     return res
 
 if __name__ == '__main__':
