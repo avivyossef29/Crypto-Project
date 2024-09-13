@@ -10,7 +10,7 @@ from optparse import OptionParser
 # Decoder for hexadecimal encoding
 decode_hex = codecs.getdecoder('hex_codec')
 
-options = OptionParser(description='Test for the Heartbleed vulnerabilit, requires a host as an argument')
+options = OptionParser(description='Test for the Heartbleed vulnerability, requires a host as an argument')
 
 
 
@@ -34,7 +34,7 @@ CLIENT_HELLO_HEX = (
     "00 0f 00 01 01"
 )
 # 18 - heartbeat , 03 02 - TLS 1.1 , 00 03 - length , 01 - message type , 40 00 - payload
-# The server will return the payload in the heartbeat response without checking == length
+# The server will return the payload in the heartbeat response without checking payload == length
 HEARTBEAT_REQUEST_HEX = (
     "18 03 02 00 03"
     "01 40 00"
