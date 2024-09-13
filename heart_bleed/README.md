@@ -1,10 +1,21 @@
-This project demonstrates the Heartbleed vulnerability (CVE-2014-0160) through an End-to-End (E2E) attack and provides two CTF challenges. The Heartbleed vulnerability, one of the most significant security issues in internet history, allowed attackers to extract sensitive data from a server's memory by exploiting a flaw in the Heartbeat protocol of OpenSSL.
+# Project Overview: Heartbleed Vulnerability Exploit and CTF Challenges
 
-1. End-to-End Attack Demonstration
-This part of the project simulates the complete attack lifecycle, demonstrating how the Heartbleed vulnerability can be exploited to extract sensitive data. It involves setting up a vulnerable SSL server, interacting with two clients, and showcasing the memory leakage attack in action.
+This project demonstrates the **Heartbleed vulnerability** (CVE-2014-0160) through an End-to-End (E2E) attack and provides two Capture The Flag (CTF) challenges. The Heartbleed vulnerability, regarded as one of the most severe security flaws in internet history, allowed attackers to extract sensitive information from a server's memory by exploiting a flaw in the Heartbeat protocol of OpenSSL.
 
-2. CTF Challenges
-Two CTF (Capture The Flag) challenges are provided in this project:
+## End-to-End Attack Demonstration
+This section of the project simulates a complete attack lifecycle, illustrating how the Heartbleed vulnerability can be exploited to extract sensitive data. The demonstration involves:
+- Setting up a **vulnerable SSL server**.
+- Interacting with **two clients**.
+- Showcasing the **memory leakage attack** in action, revealing how attackers could extract data from server memory.
 
-Beginner Challenge: Modify a vulnerable server code to stop the memory leak and protect against Heartbleed.
-Intermediate Challenge: Fix a simulated Heartbleed vulnerability by ensuring the server validates the payload length properly before returning data to the client.
+## CTF Challenges
+
+Two CTF challenges are designed for participants to both exploit and secure systems affected by the Heartbleed vulnerability:
+
+### Beginner Challenge
+- **Objective**: Modify the vulnerable server code to stop the memory leak and protect against the Heartbleed vulnerability.
+- **Task**: Ensure that the server properly handles Heartbeat requests and prevents memory leaks.
+
+### Intermediate Challenge
+- **Objective**: Fix a simulated Heartbleed vulnerability by ensuring that the server properly validates the payload length before returning data to the client.
+- **Task**: Modify the server code to patch the vulnerability and test it with the provided Python script to verify that the fix is effective.
