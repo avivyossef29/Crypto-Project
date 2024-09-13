@@ -1,71 +1,10 @@
+This project demonstrates the Heartbleed vulnerability (CVE-2014-0160) through an End-to-End (E2E) attack and provides two CTF challenges. The Heartbleed vulnerability, one of the most significant security issues in internet history, allowed attackers to extract sensitive data from a server's memory by exploiting a flaw in the Heartbeat protocol of OpenSSL.
 
-# Heartbleed Vulnerability Demonstration
+1. End-to-End Attack Demonstration
+This part of the project simulates the complete attack lifecycle, demonstrating how the Heartbleed vulnerability can be exploited to extract sensitive data. It involves setting up a vulnerable SSL server, interacting with two clients, and showcasing the memory leakage attack in action.
 
-This project demonstrates the Heartbleed vulnerability (CVE-2014-0160)
-by setting up an SSL server and using two clients to interact with it.
-The first client sends password.txt to the server.
-Later, the second client sends a malicious heartbeat request to exploit the vulnerability
-and print the first 100 lines of the server response.
-You can check that the server response contains sensitive data from the password.txt file
+2. CTF Challenges
+Two CTF (Capture The Flag) challenges are provided in this project:
 
-## Overview
-
-### Server
-
-The server is configured with a vulnerable version of OpenSSL (1.0.1f). It is designed to receive SSL/TLS connections and handle heartbeat requests, demonstrating the Heartbleed vulnerability.
-
-### Client
-
-The first client connects and sends data to the server:
-
-1. Sends a Client Hello message to establish an SSL/TLS connection.
-2. Sends sensitive data to the server to be stored in its memory.
-3. Adds a delay to ensure OpenSSL completes the process.
-
-The second client connects and sends a malicious heartbeat request to the server:
-
-1. Runs the heartbleed_test.py script to exploit the Heartbleed vulnerability.
-2. Saves the server's response to heartbeat_response.txt.
-3. Prints the first 100 lines of the server's response, showing that it contains sensitive data from the password.txt file.
-
-## Prerequisites
-
-- Docker must be installed on your system.
-
-## Setup
-- use 2 different terminals for client and server
-### Build and Run the Server
-
-1. Navigate to the server directory:
-   ```sh
-   cd server
-   ```
-
-2. Build the Docker image for the server:
-   ```sh
-   docker build -t openssl-heartbleed-server .
-   ```
-
-3. Run the server container:
-   ```sh
-   docker run --rm -it -p 443:443 openssl-heartbleed-server
-   ```
-
-### Build and Run the Client
-
-1. Navigate to the client directory:
-   ```sh
-   cd client
-   ```
-
-2. Build the Docker image for the client:
-   ```sh
-   docker build -t vulnerable-ssl-client .
-   ```
-
-3. Run the client container:
-   ```sh
-   docker run --rm vulnerable-ssl-client 172.17.0.2
-
-## Output
-- Now you can see the server response to the heartbleed attack on the client side, and the server logs on the server side.
+Beginner Challenge: Modify a vulnerable server code to stop the memory leak and protect against Heartbleed.
+Intermediate Challenge: Fix a simulated Heartbleed vulnerability by ensuring the server validates the payload length properly before returning data to the client.
