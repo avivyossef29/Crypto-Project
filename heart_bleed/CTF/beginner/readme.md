@@ -10,9 +10,10 @@ In this challenge, you need to craft a Heartbeat request that exploits the Heart
 ## How to Run
 ```bash
 python3 exploit_heartbleed.py
+```
 
 ## Hint
 if you need help understanding the vulnerability, run the script with the --hint option for guidance:
 
 ```bash
-python3 exploit_heartbleed.py --hint
+python3 exploit_heartbleed.py --hint```
