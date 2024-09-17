@@ -1,0 +1,40 @@
+POST /aaaaaaaaaa
+a HTTP/1.1\r\nCont
+ent-Type: text/p
+lain\r\nUser-Agent
+: Mozilla/4.0 (W
+indows 8 6.2) Ja
+va/1.7.0_80\r\nHos
+t: 127.0.0.3:500
+0\r\nAccept: text/
+html, image/gif,
+ image/jpeg, *; 
+q=.2, */*; q=.2.
+.Connection: kee
+p-alive\r\nContent
+-Length: 16\r\nCoo
+kie: SessionID=S
+ecretValue\r\n\r\n
+
+### the above http request used java 1.7.0_80, below is java 1.7.0
+############ for https:
+
+POST /aaaaaaaaaa
+abffffffffffffff
+f HTTP/1.1\r\nCont
+ent-Type: text/p
+lain\r\nUser-Agent
+: Mozilla/4.0 (W
+indows NT (unkno
+wn) 6.2) Java/1.
+7.0\r\nHost: 127.0
+.0.3\r\nAccept: te
+xt/html, image/g
+if, image/jpeg, 
+*; q=.2, */*; q=
+.2\r\nConnection: 
+keep-alive\r\nCont
+ent-Length: 16\r\n
+Cookie: SessionI
+D=SecretValue\r\n\r
+\n
