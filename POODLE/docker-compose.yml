@@ -8,29 +8,30 @@ services:
       custom_network:
         ipv4_address: 192.168.10.2
         mac_address: 02:42:ac:11:00:00
-    ports:
-      - "443:443"
 
-  attacker:
-    build: ./attacker
-    depends_on:
-      - server
-      - victim
-    container_name: attacker_container
-    networks:
-      custom_network:
-        ipv4_address: 192.168.10.3
-        mac_address: 02:42:ac:11:00:02
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    privileged: true
+  # attacker:
+  #   build: ./attacker
+  #   depends_on:
+  #     - server
+  #   container_name: attacker_container
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - NET_RAW
+  #   privileged: true
+  #   networks:
+  #     custom_network:
+  #       ipv4_address: 192.168.10.6
+  #       mac_address: 02:42:ac:11:00:02
 
   victim:
     build: ./victim
     depends_on:
       - server
     container_name: victim_container
+    command: bash -c "python -u ./victim.py & python -u ./attacker.py & wait"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     networks:
       custom_network:
         ipv4_address: 192.168.10.4

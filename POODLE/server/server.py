@@ -13,7 +13,12 @@ def apply_cors_headers(response):
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
     response.headers.add("Access-Control-Allow-Methods", "*")
+    response.headers.add("Connection", "keep-alive")
     return response
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify(error="Resource not found"), 404
 
 def verify_cookie(func):
     def wrapper():
@@ -32,12 +37,6 @@ def verify_cookie(func):
 @app.route('/', methods=['GET'])
 def api_root():
     res = make_response(jsonify(request.get_json()))
-    return res
-
-@app.route('/', methods=['POST'])
-@verify_cookie
-def api_post_test(text='hello'):
-    res = make_response(text)
     return res
 
 
