@@ -1,1 +1,2 @@
-settimg up the project: docker-compose up --build
+settimg up the project: docker rm -f $(docker ps -aq) | docker rmi -f $(docker images -aq) | docker-compose up -d
+

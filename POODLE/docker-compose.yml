@@ -1,13 +1,13 @@
 version: '3.9'
 
 services:
-  server:
-    build: ./server
-    container_name: server_container
-    networks:
-      custom_network:
-        ipv4_address: 192.168.10.2
-        mac_address: 02:42:ac:11:00:00
+  # server:
+  #   build: ./server
+  #   container_name: server_container
+  #   networks:
+  #     custom_network:
+  #       ipv4_address: 192.168.10.2
+  #       mac_address: 02:42:ac:11:00:00
 
   # attacker:
   #   build: ./attacker
@@ -23,22 +23,20 @@ services:
   #       ipv4_address: 192.168.10.6
   #       mac_address: 02:42:ac:11:00:02
 
-  victim:
-    build: ./victim
-    depends_on:
-      - server
-    container_name: victim_container
-    command: bash -c "python -u ./victim.py & python -u ./attacker.py & wait"
+  poodle:
+    build: ./poodle
+    container_name: poodle_container
+    command: bash -c "python -u ./server.py & python -u ./victim.py & python -u ./attacker.py & wait"
     cap_add:
       - NET_ADMIN
       - NET_RAW
     networks:
-      custom_network:
-        ipv4_address: 192.168.10.4
-        mac_address: 02:42:ac:11:00:01
+      poodle_network:
+        ipv4_address: 192.168.10.3
+        mac_address: 02:42:ac:11:00:03
 
 networks:
-  custom_network:
+  poodle_network:
     driver: bridge
     ipam:
       config:

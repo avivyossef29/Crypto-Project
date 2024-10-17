@@ -4,7 +4,7 @@ RUN apk --no-cache add bash
 
 RUN pip install -U pip
 
-RUN pip install --trusted-host pypi.python.org requests==2.5.0 urllib3==1.10 scapy==2.4.0 libpcap
+RUN pip install --trusted-host pypi.python.org requests==2.5.0 urllib3==1.10 scapy==2.4.0 libpcap flask==1.1.0
 
 COPY . .
 

