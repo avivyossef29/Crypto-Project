@@ -14,13 +14,13 @@ The challenge includes three main components:
 
 ### Challenge Modes
 
-#### Mode 1: Basic Compression Oracle
+#### Normal Mode: Basic Compression Oracle
 
 - The server compresses your input along with a secret flag
 - Your goal is to recover the flag by analyzing compression ratios
 - Ideal for understanding the basic principles of CRIME attacks
 
-#### Mode 2: Advanced - Compression + Encryption
+#### Hard mode: Compression + Encryption
 
 - Adds an encryption layer after compression
 - More realistic scenario, simulating real-world conditions (HTTPS)
