@@ -33,7 +33,6 @@ The challenge includes three main components:
 - Basic patterns that indicate successful matches
   ```python
   # Basic test with the oracle
-  from oracle_demonstration import demonstrate_compression
   python ./oracle_demonstration.py
   ```
 
