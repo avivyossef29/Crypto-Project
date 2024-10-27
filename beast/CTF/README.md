@@ -27,7 +27,7 @@ under the **Setup** section, **but instead of** running the original attacker im
    docker run --rm -t --network=host attacker_ctf_image
    ```
 
-To sum up, the steps are:
+To sum up, the steps are:\
 Use 4 different terminals for the bank server, malicious server, client and attacker_ctf.
 ### Build and Run the Bank server
 ### Build and Run the Malicious server
