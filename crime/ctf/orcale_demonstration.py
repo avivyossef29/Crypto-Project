@@ -1,7 +1,6 @@
 # oracle_demo.py
 # Demonstrates how the CRIME compression oracle works
 import requests
-import string
 import time
 import statistics
 from enum import Enum
@@ -19,25 +18,23 @@ class CompressionOracle:
         self.target_url = target_url
         self.difficulty = difficulty
 
-    def get_response_length(self, payload, num_samples=1):
+    def get_response_length(self, payload):
         """Makes a request and returns the response length"""
-        lengths = []
-        for _ in range(num_samples):
-            try:
-                response = requests.get(
-                    f"{self.target_url}?payload={payload}&difficulty={self.difficulty.value}"
-                )
-                data = response.json()
-                if "error" in data:
-                    print(f"Server error: {data['error']}")
-                    return None
-                lengths.append(data["length"])
-            except Exception as e:
-                print(f"Error making request: {e}")
+        try:
+            response = requests.get(
+                f"{self.target_url}?payload={payload}&difficulty={self.difficulty.value}"
+            )
+            data = response.json()
+            if "error" in data:
+                print(f"Server error: {data['error']}")
                 return None
-            time.sleep(0.1)  # Be nice to the server
+            length = data["length"]
+        except Exception as e:
+            print(f"Error making request: {e}")
+            return None
+        time.sleep(0.1)  # Be nice to the server
 
-        return statistics.median(lengths) if lengths else None
+        return length if length else None
 
     def demonstrate_compression_patterns(self):
         """Shows how different payloads affect compression"""
@@ -46,6 +43,10 @@ class CompressionOracle:
         # Test 1: Repeated characters compress better
         test1a = "AAAAA"
         test1b = "ABCDE"
+        if self.difficulty == DifficultyLevel.HARD:
+            test1a += "A" * 16
+            test1b += "FGHIJKLMNOPQRSTU"
+
         len1a = self.get_response_length(test1a)
         len1b = self.get_response_length(test1b)
         print("\nTest 1 - Repeated vs. Unique Characters:")
@@ -87,27 +88,6 @@ class CompressionOracle:
         print(f"Difference: {len3a - len3b}")
 
 
-    def test_encryption_impact(self):
-        """Demonstrates how encryption affects the measurements"""
-        if self.difficulty == DifficultyLevel.HARD:
-            print("\nTesting encryption impact:")
-            payload = "secret_flag: CTF{"
-            lengths = []
-            samples = 5
-
-            print(f"\nMaking {samples} requests with the same payload:")
-            for i in range(samples):
-                length = self.get_response_length(payload)
-                lengths.append(length)
-                print(f"Request {i+1}: length = {length}")
-
-            print(f"\nVariance due to encryption:")
-            print(f"Min length: {min(lengths)}")
-            print(f"Max length: {max(lengths)}")
-            print(f"Median length: {statistics.median(lengths)}")
-            print("\nNote: Encryption adds noise - multiple samples help!")
-
-
 def main():
     print("CRIME Oracle Demonstration")
     print("=========================")
@@ -127,16 +107,12 @@ def main():
     # Show basic compression patterns
     oracle.demonstrate_compression_patterns()
 
-    # Show encryption impact in HARD mode
-    if difficulty == DifficultyLevel.HARD:
-        oracle.test_encryption_impact()
-
     print("\nKey Takeaways:")
     print("1. Repeated/matching text compresses better")
     print("2. We can use this to guess the flag character by character")
     print("3. The response length reveals information about matches")
     if difficulty == DifficultyLevel.HARD:
-        print("4. Encryption adds noise - use multiple samples!")
+        print("4. CBC makes things a bit harder, find a solution!")
 
     print("\nNow you're ready to build your attack in exploit.py!")
 
