@@ -5,20 +5,16 @@ import random
 import json
 from urllib.parse import parse_qs, urlparse
 from Crypto.Cipher import AES
+from Crypto.Cipher import ARC4
 import base64
 from concurrent.futures import ThreadPoolExecutor
-import threading
-from typing import Dict, Optional
-import time
+from typing import Dict
+import string
 
 # Configuration
 PORT = 8443
 SECRET_FLAG = "secret_flag: CTF_FLAG{C0mpr3ss1oN_1S_N0T_Y0uR_Fr13ND}"
 SESSION_TOKEN = "www.youtube.com/watch?v=dQw4w9WgXcQ"
-
-# Encryption configuration
-ENCRYPTION_KEY = random.randbytes(AES.block_size)
-IV = random.randbytes(AES.block_size)
 
 # Connection and performance settings
 MAX_WORKERS = 4
@@ -30,38 +26,6 @@ def pad(data: bytes, block_size: int = 16) -> bytes:
     padding_length = block_size - (len(data) % block_size)
     padding = bytes([padding_length] * padding_length)
     return data + padding
-
-
-class CacheEntry:
-    def __init__(self, cipher):
-        self.cipher = cipher
-        self.last_used = time.time()
-
-
-class CipherCache:
-    def __init__(self, max_size: int = CONNECTION_CACHE_SIZE):
-        self.cache: Dict[str, CacheEntry] = {}
-        self.max_size = max_size
-        self.lock = threading.Lock()
-
-    def get_cipher(self, key: bytes, iv: bytes):
-        cache_key = f"{key.hex()}:{iv.hex()}"
-        with self.lock:
-            if cache_key in self.cache:
-                entry = self.cache[cache_key]
-                entry.last_used = time.time()
-                return entry.cipher
-
-            if len(self.cache) >= self.max_size:
-                # Remove oldest entry
-                oldest_key = min(
-                    self.cache.keys(), key=lambda k: self.cache[k].last_used
-                )
-                del self.cache[oldest_key]
-
-            cipher = AES.new(key, AES.MODE_CBC, iv)
-            self.cache[cache_key] = CacheEntry(cipher)
-            return cipher
 
 
 class DifficultyLevel:
@@ -80,9 +44,19 @@ class OptimizedCRIMEHandler(http.server.SimpleHTTPRequestHandler):
     Set-Cookie: session={session}
     {payload}
     """
-    cipher_cache = CipherCache()
 
     def __init__(self, *args, **kwargs):
+        # Encryption configuration
+        AES_ENCRYPTION_KEY = random.randbytes(AES.block_size)
+        IV = random.randbytes(AES.block_size)
+        self.aes_cipher = AES.new(AES_ENCRYPTION_KEY, AES.MODE_CBC, IV)
+
+        RC4_KEY = bytearray(
+            "".join(
+                random.sample(string.ascii_uppercase + string.digits, k=17)
+            ).encode()
+        )
+        self.rc4_cipher = ARC4.new(RC4_KEY)
         self.thread_pool = ThreadPoolExecutor(max_workers=MAX_WORKERS)
         super().__init__(*args, **kwargs)
 
@@ -99,18 +73,15 @@ class OptimizedCRIMEHandler(http.server.SimpleHTTPRequestHandler):
         compressed = zlib.compress(response_with_secret.encode())
 
         if difficulty == DifficultyLevel.HARD:
-            cipher = self.cipher_cache.get_cipher(ENCRYPTION_KEY, IV)
-            encrypted = cipher.encrypt(pad(compressed))
-            return {
-                "length": len(encrypted),
-                "data": base64.b64encode(encrypted).decode(),
-                "mode": "encrypted+compressed",
-            }
-
+            cipher = self.aes_cipher
+            payload = pad(compressed)
+        else:
+            cipher = self.rc4_cipher
+            payload = compressed
+        encrypted = cipher.encrypt(payload)
         return {
-            "length": len(compressed),
-            "data": base64.b64encode(compressed).decode(),
-            "mode": "compressed",
+            "length": len(encrypted),
+            "data": base64.b64encode(encrypted).decode(),
         }
 
     def do_GET(self):
@@ -130,7 +101,7 @@ class OptimizedCRIMEHandler(http.server.SimpleHTTPRequestHandler):
             future = self.thread_pool.submit(self.process_request, payload, difficulty)
             response_data = future.result(timeout=30)  # 30 second timeout
 
-            print (f"payload: {payload} \nresponding with: {response_data}")
+            print(f"payload: {payload} \nresponding with: {response_data}")
 
             # Send response
             self.send_response(200)
