@@ -1,35 +1,21 @@
 version: '3.9'
 
 services:
-  # server:
-  #   build: ./server
-  #   container_name: server_container
-  #   networks:
-  #     custom_network:
-  #       ipv4_address: 192.168.10.2
-  #       mac_address: 02:42:ac:11:00:00
+  server:
+    build: ./server
+    container_name: server_container
+    command: bash -c "python3 ./server.py"
+    networks:
+      poodle_network:
+        ipv4_address: 192.168.10.2
+        mac_address: 02:42:ac:11:00:02
 
-  # attacker:
-  #   build: ./attacker
-  #   depends_on:
-  #     - server
-  #   container_name: attacker_container
-  #   cap_add:
-  #     - NET_ADMIN
-  #     - NET_RAW
-  #   privileged: true
-  #   networks:
-  #     custom_network:
-  #       ipv4_address: 192.168.10.6
-  #       mac_address: 02:42:ac:11:00:02
-
-  poodle:
-    build: ./poodle
-    container_name: poodle_container
-    command: bash -c "python -u ./server.py & python -u ./victim.py & python -u ./attacker.py & wait"
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
+  client:
+    depends_on:
+      - server
+    build: ./client
+    container_name: client_container
+    command: bash -c "python3 ./victim && python3 ./attacker.py"
     networks:
       poodle_network:
         ipv4_address: 192.168.10.3
