@@ -1,0 +1,140 @@
+\documentclass[sigconf, nonacm]{acmart}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}  % For images
+\usepackage{hyperref}  % For clickable references and links
+\usepackage{amsmath}   % For mathematical symbols
+\usepackage{listings}  % For code listings
+\usepackage{enumitem}  % For customizing lists
+\usepackage{geometry}  % For page margins
+
+\geometry{margin=1in}
+
+\title{BEAST - Browser Exploit Against SSL/TLS}
+\author{Yuval Lihod}
+\affiliation{
+    \institution{Tel Aviv University}
+}
+\email{lihodyuval@gmail.com}
+
+
+\begin{abstract}
+This report provides an overview of the BEAST  attack against TLS/SSL protocols and describes the exploit with a complete End-to-End (E2E) attack demonstration. The E2E attack simulates a real-world scenario where a victim accesses malicious website which inject his browser Java Applet (or javascript), enable the attacker to obtain secret cookies of the victim. This report covers the attack implementation, the CTF (Capture The Flag) design and instructions.
+\end{abstract}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+The \textbf{BEAST} (CVE-2011-3389) is an attack that allow a MITM attacker to uncover information from an encrypted SSL/TLS 1.0 session by exploiting a known theoretical vulnerability in CBC mode, discovered in 2002. It could be exploited regardless of the type and strength of the block cipher.
+
+To understand the BEAST vulnerability, several key concepts are required:
+\begin{itemize}
+    \item \textbf{AES}: Block cipher - a deterministic algorithm that operates on fixed-length groups of bits, called blocks. Block size of AES is 16.
+    \item \textbf{Initialization Vector(IV)}: An input to a cryptographic primitive being used to provide the initial state. The IV is typically required to be random or pseudo-random, but sometimes an IV only needs to be unpredictable.\newline \newline
+The BEAST attack utilize the fact that it IV is predictable in TLS 1.0 and SSL versions.
+    \item \textbf{Mode of operation}: An algorithm that designed to allow securely transform amounts of data larger than a block, using block cipher.
+    \item \textbf{Cipher Block Chaining(CBC)}: Mode of operation. In CBC mode, each block of plaintext is XORed with the previous ciphertext block before being encrypted. To make each message unique, an IV must be used in the first block.
+\end{itemize}
+
+The SSL standard mandates the use of the CBC mode encryption with chained IVs; i.e., the IV used when encrypting a message should be the last block of the previous
+ciphertext. That leads to a vulnerability exploit by the BEAST attack - 
+Combined with clever manipulation of block boundaries, the flaw allowed a MITM attacker sniffing encrypted traffic to discover small amounts of information without performing any decryption.\newline
+According to 'Qualys labs' as of January 2014, only 25.7\% of websites support TLS 1.1 or 1.2, while the attack was discovered in 2011. \cite{qualyslabs}
+
+
+\section{Related Work}
+
+Several sources provide a detailed analysis of the attack:
+
+\begin{itemize}
+    \item \textbf{T.Duong and J.Rizzo(2011)}: \emph{Here Come The Ninjas} \cite{duong2011}  is the original attack paper.  It provides a comprehensive analysis of cryptographic aspect of the attack, the threat model and a broswer exploit implementations. 
+
+    \item \textbf{P.Rogaway (2002)}: \emph{Security of CBC Ciphersuites in SSL/TLS: Problems and Countermeasures.} \cite{rogaway2002}, The vulnerability originally discovered by Phillip Rogaway in 2002.
+
+    \item \textbf{W.Dai (2002)}: \emph{An Attack Against SSH2 Protocol.} \cite{dai2002} Extension to Rogaway's attack to SSH protocol.
+\end{itemize}
+
+
+
+\section{Attack Description}
+The E2E attack demonstrates the BEAST attack by setting up a TLS 1.0 bank server, malicious web, client and an attacker.
+
+\subsection{Server Setup}
+The server is configured with \textbf{TLS 1.0} to simulate the vulnerability. The server accepts TLS connections and handle HTTP requests.
+
+\subsection{Client Operations}
+The client establishes a connection to malicious website, controled by the attacker.
+
+\subsection{Malicious-Website Setup}
+When client accesses the web, it injects him Java Applet, which make the client open connections to his Bank website (the 'Server') and make requests that include the client's cookies. 
+\subsection{Attacker Operations}
+The attacker perform MITM attack. He eavesdrop the communication between the victim (the 'Client') and the Bank, captures the cookie bearing requests. Then he perform the cryptographic part of the attack, and decide what will be the next path of the following request (that is how he controls the block boundaries). 
+\subsection{Demonstration Steps}
+\begin{enumerate}
+    \item Set up the bank server by running:
+    \begin{lstlisting}[language=bash, breaklines=true]
+    docker docker build -t server_image .
+    docker run --rm -t --network=host server_image
+    \end{lstlisting}
+    \item Set up the malicious website by running:
+    \begin{lstlisting}[language=bash, breaklines=true]
+    docker build -t mal_server_image .
+    docker run --rm -t --network=host mal_server_image
+    \end{lstlisting}
+    \item Run the attacker by executing:
+    \begin{lstlisting}[language=bash, breaklines=true]
+    docker build -t attacker_image .
+    docker run --rm -t --network=host attacker_image
+    \end{lstlisting}
+    \item Run the client by executing:
+    \begin{lstlisting}[language=bash, breaklines=true]
+    docker build -t client_image .
+    docker run --rm -t --network=host client_image
+    \end{lstlisting}
+\end{enumerate}
+
+
+\section{Design}
+There are 2 CTF challenges: \textbf{Beginner} and \textbf{Advanced}. Each challenge created by removing some code parts of the E2E 'Attacker' implementation, where the Advanced challenge created by removing more parts than the Beginner.\newline
+Thus, you should start with the Advanced challenge, and only if you can't solve it try the esaier 'Beginner' challenge.\newline
+\newline
+As the CTF created from the E2E attack, it has the same design:\newline
+The CTF project is designed using Docker to containerize the bank server, malicious web server, attacker and client, ensuring isolation and reproducibility.\newline
+All of them, but the client, are implemented in Python. The client is consists of nothing but its Dockerfile.\newline
+Docker simplifies the deployment and setup for participants, allowing them to focus only on the implementation of the cryptographic part of the attack in the CTF.
+
+The tools and libraries used include:
+\begin{itemize}
+    \item \textbf{Docker}: To create isolated containers for the servers, attacker and client, ensuring the environment is consistent across different systems.
+    \item \textbf{Java Development Kit (JDK)}: The client's browser uses JDK 7 to run the malicious website script, written in Java.
+    \item \textbf{Firefox}: The client uses Firefox 7 which support the unpatched vulnerable version of TLS 1.0. 
+    \item \textbf{Python}: The attacker uses the following libraries: -\texttt{scapy} library to eavesdrop the communications between the client and the bank server  (Imitate the MITM attack).\newline
+    -\texttt{socket} library to communicate with the client, make him send crafted requests.\newline
+    -\texttt{threading} library to run 2 threads: the first accounts for the cryptographic aspect and the second for the eavesdropping.
+
+    Both servers use the \texttt{http} library. The bank's server also use the \texttt{ssl} library to support secure connections, using SSL or TLS.
+\end{itemize}
+
+
+\section{CTF Instructions}
+You should complete the missing code parts denoted in '?'. Notice that each '?' might be more than 1 line of code. Any clues, if exist, will appear in a remark adjacent to the relevant missing code part.\newline
+In order to check your solution you should act in accordance with the instructions detailed in section 3.5, \textbf{but instead of} running the original attacker image (step 3) you need to run the following commands from inside the folder of the relevant CTF challenge:\begin{lstlisting}[language=bash, breaklines=true]
+    docker build -t attacker_ctf_image .
+    docker run --rm -t --network=host attacker_ctf_image
+    \end{lstlisting}
+If you were right then the attacker will print the client's cookie.
+
+\section{Conclusion}
+The BEAST attack demonstrates how cryptographic imperfections that were viewed as hypothetical or unreasonable could utilized to breach communications security.\newline
+
+When the direct assault was delivered in 2011,  the TLS 1.1,  which was published in 2006, particular had proactively been tended to for the issue with the CBC mode, yet it was not widely used. The moral of the story is that you shouldn't linger behind the latest security conventions.\newline
+
+By participating in this CTF, participants learn how to exploit the cryptographic imperfection in CBC mode in order to breach SSL/TLS communications security and decrypt confidential data.
+
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references_yuval}
+
+\end{document}
