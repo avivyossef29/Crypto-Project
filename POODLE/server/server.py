@@ -1,11 +1,11 @@
 from flask import Flask, jsonify, request, make_response
-from ssl3 import encode, decrypt
+from ssl3 import encrypt, decrypt, bytes_to_str, str_to_bytes
 from uuid import uuid4
 import os
 
 app = Flask(__name__)
 
-cookie = str(uuid4())
+SECRET_COOKIE = uuid4().hex
 logged_in = False
 
 cbc_key = os.urandom(16)
@@ -23,9 +23,11 @@ def refresh_keys():
     mac_key = os.urandom(16)
     mac_iv = os.urandom(16)
 
-def verify_cookie(func):
-
-def decrypt_request(func):
+@app.before_request
+def verify_cookie():
+    cookie = request.cookies.get("cookie", "")
+    if cookie != SECRET_COOKIE and request.path != "/login":
+        return "Wrong or missing cookie", 403
 
 @app.after_request
 def apply_cors_headers(response):
@@ -38,31 +40,34 @@ def apply_cors_headers(response):
 def page_not_found(e):
     return jsonify(error="Resource not found"), 404
 
-@app.route('/', methods=['GET'])
-@decrypt_request
+@app.route('/', methods=['POST'])
 def api_root():
-    res = make_response(jsonify(request.get_json()))
-    return res
+    text = request.data
+    try:
+        d = decrypt(str_to_bytes(text), cbc_key, cbc_iv, mac_key, mac_iv)
+        return d, 200
+    except Exception as e:
+        refresh_keys()
+        return str(e), 423
 
 
 @app.route('/login', methods=['POST'])
 def login():
-    global logeed_in
-    if logeed_in:
-        return null
-    logeed_in = True
-    return cookie
+    global logged_in
+    if logged_in:
+        return "You are already logged in", 403
+    logged_in = True
+    return SECRET_COOKIE
     
 
 @app.route('/keys', methods=['GET'])
-@verify_cookie
 def get_keys():
-    return jsonify({"keys": (cbc_key, cbc_iv, mac_key, mac_iv)})    
+    return jsonify({"keys": [bytes_to_str(i) for i in [cbc_key, cbc_iv, mac_key, mac_iv]]})
 
-@app.route('/check-cookie', methods=['GET'])
-def check_cookie():
-
+@app.route('/get-private-data', methods=['GET'])
+def ctf_final_check():
+    return '\033[92m' + "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\nCongradulations!!! You won the CTF challenge!!!\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n" + '\033[0m', 200
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=443)
+    app.run(host='0.0.0.0', port=3000)

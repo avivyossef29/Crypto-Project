@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from Crypto.Random import get_random_bytes
+import base64
 
 def encrypt(text: str, cbc_key: bytes, cbc_iv: bytes, mac_key: bytes, mac_iv: bytes) -> bytes:
     text = text.encode()
@@ -32,4 +33,10 @@ def verify_mac(text: bytes, cipher, mac: bytes) -> bool:
     return create_mac(text, cipher) == mac
 
 def unpad(text: bytes):
-    return text[:-int(text[-1])]
+    return text[:-text[-1]]
+
+def bytes_to_str(text: bytes) -> str:
+    return base64.b64encode(text).decode()
+
+def str_to_bytes(text: str) -> bytes:
+    return base64.b64decode(text)
