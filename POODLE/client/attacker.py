@@ -2,6 +2,8 @@ from victim import get_request, send_request, check_solution
 import requests
 
 def main():
+    cookie = ""
+
     ########## ↓↓↓ WORK ONLY HERE ↓↓↓  ##########
     length = find_length()
     decrypted_request = list("-" * len(get_request("", "")))
@@ -11,7 +13,7 @@ def main():
     cookie = "".join(decrypted_request[index + 1 : index + 33])
     ########## ↑↑↑ WORK ONLY HERE ↑↑↑  ##########
 
-    print(check_solution())
+    print(check_solution(cookie))
 
 ########## ↓↓↓ FEEL FREE TO ADD FUNCTIONS ↓↓↓  ##########
 

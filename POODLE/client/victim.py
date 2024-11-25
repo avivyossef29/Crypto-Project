@@ -17,7 +17,7 @@ def send_request(request: bytes):
                             headers={"Content-Type":"application/json"})
     return response
 
-def check_solution():
+def check_solution(cookie: str) -> str:
     response = requests.get(url="http://server_container:3000/get-private-data",
                             cookies={"cookie": cookie},
                             headers={"Content-Type":"application/json"})

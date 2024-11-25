@@ -44,8 +44,8 @@ def page_not_found(e):
 def api_root():
     text = request.data
     try:
-        d = decrypt(str_to_bytes(text), cbc_key, cbc_iv, mac_key, mac_iv)
-        return d, 200
+        decrypt(str_to_bytes(text), cbc_key, cbc_iv, mac_key, mac_iv)
+        return "", 200
     except Exception as e:
         refresh_keys()
         return str(e), 423
