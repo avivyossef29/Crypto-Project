@@ -42,7 +42,7 @@ def find_block(index: int, length: int, decrypted_request: list):
             response = send_request(edited_request)
             counter += 1
         decrypted_byte = request[index * 16 - 1] ^ 16 ^ request[-17]
-        print(f"found byte after {counter} requests: ", decrypted_byte)
+        print(f"found byte after {counter} requests: ", chr(decrypted_byte))
         decrypted_request[(index + 1) * 16 - i - 1] = chr(decrypted_byte)
         sum_counts += counter
     print("".join(decrypted_request))
