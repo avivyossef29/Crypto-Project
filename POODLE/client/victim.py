@@ -14,7 +14,7 @@ def get_request(path: str, data: str) -> bytes:
 
     @returns (bytes): Padded and encrypted request as bytes
     """
-    request = f"POST /{path} HTTP/1.1\r\nCookie: cookie={_SECRET_COOKIE}\r\nBody: {data}"
+    request = f"POST /{path} HTTP/1.1\r\nCookies: session-cookie={_SECRET_COOKIE}\r\nBody: {data}"
     response = requests.get(url= _ROOT_URL + "keys",
                             cookies={"cookie": _SECRET_COOKIE},
                             headers={"Content-Type":"application/json"})

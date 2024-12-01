@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository is a capture the flag type of game. You are an experienced hacker and you managed to perform a Man-in-the-Middle attack on an unsuspecting victim. You are now in the middle of the session between the victim and a site holding his private data (let's say a bank or something). You have the ability to force the victim to send api calls the site, modify them before they are sent and view the responses. Your mission is to find the session cookie that the victim holds which lets him access all his information.
+This repository is a capture the flag type of game. You are an experienced hacker and you managed to perform a Man-in-the-Middle attack on an unsuspecting victim. You are now in the middle of the session between the victim and a site holding his private data (let's say a bank or something). You have the ability to force the victim to send requests to the site, modify them before they are sent and view the responses. Your mission is to find the session cookie that the victim holds which lets him access all his information.
 
 ## Background
 
@@ -10,7 +10,7 @@ The POODLE vulnerability (which stands for "Padding Oracle On Downgraded Legacy 
 
 ## Instructions
 
-This project has a server folder and aclient folder. As the attacker you are allowed to only write code in the *attacker.py* file in the client folder. Feel free to view all other folders it will help you understand how this challenge works. Below is an explanation of each file and APIs:
+This project has a server folder and a client folder. As the attacker you are allowed to only write code in the *attacker.py* file in the client folder. Feel free to view all other folders it will help you understand how this challenge works. Below is an explanation of each file and APIs:
 
 ### ssl3.py
 
@@ -44,9 +44,9 @@ This is your script. Write your code only where it says you can. You are not all
 
 ## Running the Project
 
-This project is meant to run with docker to ensure a closed independent environment. To run it just run `docker compose up -d`.
+This project is meant to run with docker to ensure a closed independent environment. To run it just run `docker compose up -d --build`. This command will build the images of the server and client, create a private network and run the containers. If you don't use Docker Desktop you can view the logs of each container with `docker logs client_container` or `docker logs server_container`. If you need to change your code simply do `docker compose down` to shut down the running project and after you are done editing and ready to run then type again  `docker compose up -d --build`. This will rebuild the images.
 
-You can also run it in your own environment. There is a list of dependencies in the *requirements.txt* file. You should run the server first with `python -u server.py` (in the server folder), and then run your script `python -u attacker.py` (in the client folder). **Note that you will have to change the _ROOT_URL in the victim.py file to http://localhost:3000/**
+You can also run it in your own environment. There is a list of dependencies in the *requirements.txt* file. You should run the server first with `python -u server.py` (in the server folder), and then run your script `python -u attacker.py` (in the client folder). The server needs to be up before the client since the client has to request the cookie forn the server.  **Note that you will have to change the _ROOT_URL in the victim.py file to http://localhost:3000/**
 
 ## Clues & Tips
 
