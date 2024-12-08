@@ -5,8 +5,7 @@ import os
 
 app = Flask(__name__)
 
-SECRET_COOKIE = uuid4().hex
-logged_in = False
+os.environ["SECRET_COOKIE"] = uuid4().hex
 
 cbc_key = os.urandom(16)
 cbc_iv = os.urandom(16)
@@ -49,16 +48,6 @@ def api_root():
     except Exception as e:
         refresh_keys()
         return str(e), 423
-
-
-@app.route('/login', methods=['POST'])
-def login():
-    global logged_in
-    if logged_in:
-        return "You are already logged in", 403
-    logged_in = True
-    return SECRET_COOKIE
-    
 
 @app.route('/keys', methods=['GET'])
 def get_keys():

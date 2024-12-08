@@ -3,7 +3,7 @@ services:
   server:
     build: ./server
     container_name: server_container
-    command: bash -c "python3 -u ./server.py"
+    command: bash -c "python3 -u ./server.py & python3 -u ./victim.py"
     networks:
       poodle_network:
         ipv4_address: 192.168.10.2

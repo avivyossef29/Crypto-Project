@@ -1,4 +1,4 @@
-from victim import get_request, send_request, check_solution
+from victim_api import get_request, send_request, check_solution
 import requests
 
 def main():
@@ -9,7 +9,6 @@ def main():
 
 
     ########## ↑↑↑ WORK ONLY HERE ↑↑↑  ##########
-
     print(check_solution(cookie))
 
 ########## ↓↓↓ FEEL FREE TO ADD FUNCTIONS ↓↓↓  ##########
