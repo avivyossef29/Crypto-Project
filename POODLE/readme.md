@@ -28,8 +28,11 @@ This is a module file created for the project that holds all the encryption func
 This is the server that communicates with the victim. It holds the secret cookie along with the user and each request is verified to have the cookie. Requests that have wrong cookie are rejected. It has a set of keys and IVs (initialization vector) for the mac and the encryption. These are refreshed everytime a request is rejected (to simulate a connection drop in the SSL session). The endpoints in the server are not so important since all your interaction goes through the victim api.
 
 ### victim.py
+This is the user you attack. All your interactions with the server go through him. He holds the cookie so only he can make calls to the server.
 
-This is the user you attack. All your interactions with the server go through him. He holds the cookie so only he can make calls to the server. This is the API you are given for this challenge:
+### victim_api.py
+
+This is the API you are given for this challenge:
 
 - **get_request(path, data):** This function gets a path in the url and data for the body of the request and returns the encrypted request that would be sent to the server (this is how you modify the requests)
 
@@ -46,7 +49,7 @@ This is your script. Write your code only where it says you can. You are not all
 
 This project is meant to run with docker to ensure a closed independent environment. To run it just run `docker compose up -d --build`. This command will build the images of the server and client, create a private network and run the containers. If you don't use Docker Desktop you can view the logs of each container with `docker logs client_container` or `docker logs server_container`. If you need to change your code simply do `docker compose down` to shut down the running project and after you are done editing and ready to run then type again  `docker compose up -d --build`. This will rebuild the images.
 
-You can also run it in your own environment. There is a list of dependencies in the *requirements.txt* file. You should run the server first with `python -u server.py` (in the server folder), and then run your script `python -u attacker.py` (in the client folder). The server needs to be up before the client since the client has to request the cookie forn the server.  **Note that you will have to change the _ROOT_URL in the victim.py file to http://localhost:3000/**
+You can also run it in your own environment. There is a list of dependencies in the *requirements.txt* file. You should run the server first with `python -u server.py & python -u victim.py` (in the server folder), and then run your script `python -u attacker.py` (in the client folder). The server needs to be up before the client since the client has to request the cookie form the server.  **Note that you will have to change the _SERVER_URL in the victim.py file to http://localhost:3000/ and both _SERVER_URL and _VICTIM_URL in the vicitm_api.py file to http://localhost:3000/ and http://localhost:4000/ respectively**
 
 ## Clues & Tips
 

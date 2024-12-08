@@ -6,13 +6,28 @@ _VICTIM_URL = "http://server_container:4000/"
 _SERVER_URL = "http://server_container:3000/"
 
 def get_request(path: str, data: str) -> bytes:
+    """Gets a path and data and returns the encrypted request
+    that will be sent to that path with the data. The request 
+    will be ecrypted with the keys recieved from the server
+
+    @param path (str): The path in the url that the request will be sent to
+    @param data (str): The data to be added to the body of the request
+
+    @returns (bytes): Padded and encrypted request as bytes
+    """
     response = requests.get(url= _VICTIM_URL,
-                            json={"path": path, "data": data}
+                            params={"path": path, "data": data},
                             headers={"Content-Type":"application/json"})
     return str_to_bytes(response.text)
 
 
 def send_request(request: bytes):
+    """Sends the request to the server together with the cookie
+
+    @param request (bytes): The request as bytes to be sent to the server
+
+    @returns (response): The response from the server
+    """
     response = requests.post(url= _VICTIM_URL,
                             data=bytes_to_str(request),
                             headers={"Content-Type":"application/json"})

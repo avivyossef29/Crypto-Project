@@ -4,16 +4,13 @@ import requests
 def main():
     cookie = ""
 
-    ########## ↓↓↓ WORK ONLY HERE ↓↓↓  ##########
+    ########## ↓↓↓ WORK HERE ↓↓↓  ##########
 
+    ########## ↑↑↑ WORK HERE ↑↑↑  ##########
 
-
-    ########## ↑↑↑ WORK ONLY HERE ↑↑↑  ##########
     print(check_solution(cookie))
 
 ########## ↓↓↓ FEEL FREE TO ADD FUNCTIONS ↓↓↓  ##########
-
-
 
 ########## ↑↑↑ END OF CODE ↑↑↑  ##########
 
