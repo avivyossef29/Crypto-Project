@@ -1,0 +1,28 @@
+
+services:
+  server:
+    build: ./server
+    container_name: server_container
+    command: bash -c "python3 -u ./server.py & python3 -u ./victim.py"
+    networks:
+      poodle_network:
+        ipv4_address: 192.168.10.2
+        mac_address: 02:42:ac:11:00:02
+
+  client:
+    depends_on:
+      - server
+    build: ./client
+    container_name: client_container
+    command: bash -c "python3 -u ./attacker.py"
+    networks:
+      poodle_network:
+        ipv4_address: 192.168.10.3
+        mac_address: 02:42:ac:11:00:03
+
+networks:
+  poodle_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
